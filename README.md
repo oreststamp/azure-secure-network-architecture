@@ -130,28 +130,21 @@ Two additional routes exist specifically to demonstrate the security architectur
 
 ---
 
-## Debugging story: what actually went wrong (and why it's worth reading)
+## Debugging story
 
-Getting this architecture working end-to-end was not a straight line, and the failures were genuinely instructive rather than trivial typos:
 
 1. **Empty `requirements.txt`** committed by mistake caused the deployed app to crash with `ModuleNotFoundError: No module named 'pyodbc'` — even though the dependency was declared.
 2. **Misdiagnosis under pressure:** assuming `pyodbc` was failing to compile on Azure's build system, the fix applied was to disable Azure's build process (Oryx) entirely and ship a pre-built virtual environment from the GitHub Actions runner instead.
 3. **This introduced a second, harder problem:** the pre-built environment was compiled against a newer version of `glibc` than Azure's App Service Linux image provides, causing `antenv/bin/python: version 'GLIBC_2.34' not found` — a binary compatibility failure between two different Linux environments.
-4. **The actual fix** was to revert both mistakes: fix the empty `requirements.txt`, and let Azure's own build system (Oryx) install dependencies directly on its own compatible image, rather than shipping a foreign-built environment.
-5. **A final, separate issue** surfaced once the app was running: SQL connections failed with `Connection was denied because Deny Public Network Access is set to Yes`, even though the private endpoint was correctly configured. The cause was a missing **Virtual Network Link** on the Private DNS Zone — without it, DNS queries from inside the VNet fell back to the public IP instead of resolving to the private endpoint's private IP.
+4. The actual fix was to revert both mistakes: fix the empty `requirements.txt`, and let Azure's own build system (Oryx) install dependencies directly on its own compatible image, rather than shipping a foreign-built environment.
+5. SQL connections failed with `Connection was denied because Deny Public Network Access is set to Yes`, even though the private endpoint was correctly configured. The cause was a missing **Virtual Network Link** on the Private DNS Zone — without it, DNS queries from inside the VNet fell back to the public IP instead of resolving to the private endpoint's private IP.
 
-Each of these was diagnosed using Azure's Log Stream and GitHub Actions logs, one layer at a time, rather than guessing.
 
 ---
 
 ## Known limitations
 
 - Generated "short" links use Azure's default hostname and are not visually short (see note above)
-- Monitoring and alerting (Log Analytics + alert rules) were attempted but blocked by a persistent Azure Portal authentication error (`InvalidAuthenticationToken`) when loading Diagnostic Settings, which did not resolve after registering the `Microsoft.Insights` resource provider, clearing sessions, or using a fresh browser profile. This is a good candidate for a future iteration.
 - Key Vault uses public network access (not a private endpoint) since it stores only a demonstration secret in this project. In a production system handling real credentials, it would follow the same private endpoint pattern used for SQL.
 
 ---
-
-## Cost notes
-
-This project runs on Azure's free-tier allowances where possible (SQL Serverless with auto-pause, Key Vault's free operation tier). The App Service Plan requires at least the **Basic (B1)** tier rather than Free (F1), since the F1 tier does not support Regional VNet Integration, which this architecture depends on for private database connectivity.
