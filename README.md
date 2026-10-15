@@ -1,4 +1,4 @@
-# Secure URL Shortener on Azure
+# Secure Network Architecture on Azure, featuring a URL Shortener Service
 
 A URL shortener application deployed on Azure, built around a security-first infrastructure design rather than around the app itself. The application is intentionally simple — the goal of this project is to demonstrate a private, production-style architecture: network isolation, password-free authentication, and automated CI/CD deployment.
 
