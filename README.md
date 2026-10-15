@@ -2,9 +2,8 @@
 
 A URL shortener application deployed on Azure, built around a security-first infrastructure design rather than around the app itself. The application is intentionally simple — the goal of this project is to demonstrate a private, production-style architecture: network isolation, password-free authentication, and automated CI/CD deployment.
 
-**Live app:** `https://app-securewebapp-dev-os-crgrh9hnf0a5f8b0.westus2-01.azurewebsites.net/`
 
-> Note: the generated "short" links use Azure's default App Service hostname, so they are not visually short. In a production setup this would sit behind a custom short domain (e.g. `sho.rt`). The link generation, redirect, and click-tracking logic all work correctly — only the domain length is a cosmetic limitation of using Azure's free default hostname.
+Note: the generated "short" links use Azure's default App Service hostname, so they are not visually short. In a production setup this would sit behind a custom short domain. The link generation, redirect, and click-tracking logic all work correctly — only the domain length is a cosmetic limitation of using Azure's free default hostname.
 
 ---
 
